@@ -17,15 +17,16 @@
 对于具有N层的ViT，将输入图像划分为m个固定大小的Patch $\{ I_j∈R^{3 × h × w} | j∈N，1≤j≤m \}$，h，w为图像块的高度和宽度。然后，每个Patch首先通过Embed和位置编码嵌入到D维隐空间中：
 
 $$
-\begin{align}
 e_{0}^j = Embed(I_j)
-\end{align}
 $$
 
 将Embed的集合记为$E_i$,并引入分类标记头[CLS]记为$x_i$,则可以将ViT视为如下表达式：
 
 $$
-[x_i,E_i] = L_i([x_{i-1},E_{i-1}])\\
+[x_i,E_i] = L_i([x_{i-1},E_{i-1}])
+$$
+
+$$
 y = Head(x_N)
 $$
 
@@ -38,8 +39,12 @@ $$
 VPT-Shallow仅在第一个Transformer前加入提示，记第一个提示为$P$，则shallow-prompt ViT可以记为:
 
 $$
-[x_1,Z_1,E_1] = L_1([x_0,P,E_0])\\
-[x_i,Z_i,E_i] = L_i([x_{i-1},Z_{i-1},E_{i-1}])\\
+[x_1,Z_1,E_1] = L_1([x_0,P,E_0])
+$$
+$$
+[x_i,Z_i,E_i] = L_i([x_{i-1},Z_{i-1},E_{i-1}])
+$$
+$$
 y=Head(x_N)
 $$
 
@@ -50,7 +55,9 @@ $$
 VPT-Deep在每层Transformer输入空间中引入Prompt，将每层输入的可学习提示记为$P_i$，则Deep-prompt ViT可以记为:
 
 $$
-[x_i,Z_i,E_i] = L_i([x_{i-1},P_{i-1},E_{i-1}])\\
+[x_i,Z_i,E_i] = L_i([x_{i-1},P_{i-1},E_{i-1}])
+$$
+$$
 y=Head(x_N)
 $$
 
