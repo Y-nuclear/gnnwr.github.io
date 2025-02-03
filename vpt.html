@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -60,12 +60,11 @@
     <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'vpt';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Content with notebooks" href="notebooks.html" />
+    <link rel="next" title="Revisiting the Power of Prompt for Visual Tuning" href="spt.html" />
     <link rel="prev" title="Welcome to your Jupyter Book" href="intro.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -389,53 +388,56 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="visual-prompt-tuning">
+  <section id="visual-prompt-tuning">
 <h1>Visual Prompt Tuning<a class="headerlink" href="#visual-prompt-tuning" title="Link to this heading">#</a></h1>
 <ul class="simple">
-<li><p>文章链接：<a class="reference external" href="https://arxiv.org/abs/2203.12119">https://arxiv.org/abs/2203.12119</a></p></li>
-<li><p>Github：<a class="github reference external" href="https://github.com/kmnp/vpt">kmnp/vpt</a></p></li>
+<li><p>文章链接：<a class="reference external" href="https://arxiv.org/abs/2203.12119">Visual Prompt Tuning</a></p></li>
+<li><p>Github：<a class="reference external" href="https://github.com/kmnp/vpt">kmnp/vpt</a></p></li>
 <li><p>时间：2022</p></li>
 </ul>
 <section id="id1">
 <h2>摘要<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
-<p>当前采用预训练模型的做法涉及更新所有骨干参数，即完全微调（Full）。本文引入视觉提示调谐( Visual Prompt Tuning，VPT )作为视觉上大规模Transformer模型全微调的一种高效有效的替代方案。<strong>受启发于最近在高效调优大型语言模型方面的进展</strong>，VPT在保持模型主干冻结的同时，仅在输入空间中引入少量可训练参数(小于模型参数的1%)。通过在各种下游识别任务上的大量实验，我们表明，与其他参数有效的调优协议相比，VPT取得了显著的性能增益。最重要的是，在许多情况下，VPT甚至优于完全微调。
-<img alt="VPT summary" src="_images/image.png" /></p>
+<p>当前采用预训练模型的做法涉及更新所有骨干参数，即完全微调（Full）。本文引入视觉提示调谐( Visual Prompt Tuning，VPT )作为视觉上大规模Transformer模型全微调的一种高效有效的替代方案。<strong>受启发于最近在高效调优大型语言模型方面的进展</strong>，VPT在保持模型主干冻结的同时，仅在输入空间中引入少量可训练参数(小于模型参数的1%)。通过在各种下游识别任务上的大量实验，我们表明，与其他参数有效的调优协议相比，VPT取得了显著的性能增益。最重要的是，在许多情况下，VPT甚至优于完全微调。</p>
+<p><img alt="VPT summary" src="_images/image.png" /></p>
 </section>
 <section id="id2">
 <h2>模型/方法<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
 <section id="vit">
 <h3>VIT<a class="headerlink" href="#vit" title="Link to this heading">#</a></h3>
-<p>对于具有N层的ViT，将输入图像划分为m个固定大小的Patch({ I_j∈R^{3 × h × w} | j∈N，1≤j≤m })，h，w为图像块的高度和宽度。然后，每个Patch首先通过Embed和位置编码嵌入到D维隐空间中：
-$<span class="math notranslate nohighlight">\(
-e_0^j = Embed(I_j)
-\)</span><span class="math notranslate nohighlight">\(
-将Embed的集合记为\)</span>E_i<span class="math notranslate nohighlight">\(,并引入分类标记头[CLS]记为\)</span>x_i<span class="math notranslate nohighlight">\(,则可以将ViT视为如下表达式：
-\)</span><span class="math notranslate nohighlight">\(
-[x_i,E_i] = L_i([x_{i-1},E_{i-1}])\\
+<p>对于具有N层的ViT，将输入图像划分为m个固定大小的Patch ${ I_j∈R^{3 × h × w} | j∈N，1≤j≤m }$，h，w为图像块的高度和宽度。然后，每个Patch首先通过Embed和位置编码嵌入到D维隐空间中：</p>
+<p>$$</p>
+<div class="amsmath math notranslate nohighlight" id="equation-56a66b89-3b4b-4ae4-ae5e-41afc82f07b9">
+<span class="eqno">()<a class="headerlink" href="#equation-56a66b89-3b4b-4ae4-ae5e-41afc82f07b9" title="Permalink to this equation">#</a></span>\[\begin{align}
+e_{0}^j = Embed(I_j)
+\end{align}\]</div>
+<p>$$</p>
+<p>将Embed的集合记为$E_i$,并引入分类标记头[CLS]记为$x_i$,则可以将ViT视为如下表达式：</p>
+<p>$$
+[x_i,E_i] = L_i([x_{i-1},E_{i-1}])\
 y = Head(x_N)
-\)</span>$</p>
+$$</p>
 </section>
 <section id="vpt">
 <h3>VPT<a class="headerlink" href="#vpt" title="Link to this heading">#</a></h3>
 <p>对于一个已经完成预训练的Transformer模型，VPT在Embed层后引入一组p个D维连续embedding，即提示。在微调期间仅更新任务特定的提示，而保持Transformer的主干冻结。</p>
 <section id="vpt-shallow">
 <h4>VPT-Shallow<a class="headerlink" href="#vpt-shallow" title="Link to this heading">#</a></h4>
-<p>VPT-Shallow仅在第一个Transformer前加入提示，记第一个提示为<span class="math notranslate nohighlight">\(P\)</span>，则shallow-prompt ViT可以记为:
-$<span class="math notranslate nohighlight">\(
-[x_1,Z_1,E_1] = L_1([x_0,P,E_0])\\
-[x_i,Z_i,E_i] = L_i([x_{i-1},Z_{i-1},E_{i-1}])\\
+<p>VPT-Shallow仅在第一个Transformer前加入提示，记第一个提示为$P$，则shallow-prompt ViT可以记为:</p>
+<p>$$
+[x_1,Z_1,E_1] = L_1([x_0,P,E_0])\
+[x_i,Z_i,E_i] = L_i([x_{i-1},Z_{i-1},E_{i-1}])\
 y=Head(x_N)
-\)</span>$
-其中仅有P和Head为可学习参数。</p>
+$$</p>
+<p>其中仅有P和Head为可学习参数。</p>
 </section>
 <section id="vpt-deep">
 <h4>VPT-Deep<a class="headerlink" href="#vpt-deep" title="Link to this heading">#</a></h4>
-<p>VPT-Deep在每层Transformer输入空间中引入Prompt，将每层输入的可学习提示记为<span class="math notranslate nohighlight">\(P_i\)</span>，则Deep-prompt ViT可以记为:
-$<span class="math notranslate nohighlight">\(
-[x_i,Z_i,E_i] = L_i([x_{i-1},P_{i-1},E_{i-1}])\\
+<p>VPT-Deep在每层Transformer输入空间中引入Prompt，将每层输入的可学习提示记为$P_i$，则Deep-prompt ViT可以记为:</p>
+<p>$$
+[x_i,Z_i,E_i] = L_i([x_{i-1},P_{i-1},E_{i-1}])\
 y=Head(x_N)
-\)</span><span class="math notranslate nohighlight">\(
-其中每层的\)</span>P_i$直接引入，不受transformer输出的影响，同时其与Head为可学习参数。</p>
+$$</p>
+<p>其中每层的$P_i$直接引入，不受transformer输出的影响，同时其与Head为可学习参数。</p>
 </section>
 <section id="vpt-swin">
 <h4>VPT-swin<a class="headerlink" href="#vpt-swin" title="Link to this heading">#</a></h4>
@@ -446,8 +448,8 @@ y=Head(x_N)
 <section id="id3">
 <h2>实验结果<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
 <p><img alt="对比实验结果1" src="_images/result_1.png" />
-<img alt="对比实验结果2" src="_images/result_2.png" />
-VPT-Deep在多个任务里要好于完全微调，在适应较大的Transformer中是一个有较大潜力的方法。VPT-Shallow要次于Deep，但在存储受限的条件下仍然有较大的潜力。</p>
+<img alt="对比实验结果2" src="_images/result_2.png" /></p>
+<p>VPT-Deep在多个任务里要好于完全微调，在适应较大的Transformer中是一个有较大潜力的方法。VPT-Shallow要次于Deep，但在存储受限的条件下仍然有较大的潜力。</p>
 </section>
 </section>
 
@@ -491,11 +493,11 @@ VPT-Deep在多个任务里要好于完全微调，在适应较大的Transformer�
       </div>
     </a>
     <a class="right-next"
-       href="notebooks.html"
+       href="spt.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Content with notebooks</p>
+        <p class="prev-next-title">Revisiting the Power of Prompt for Visual Tuning</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
